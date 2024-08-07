@@ -1,6 +1,8 @@
 # otel-logpoint
 ABAP telemetry via log-points PoC
 
+This is the plugin for core [Otel API](https://github.com/abapify/otel) project.
+
 The main problem in ABAP is not how to generate trace data because this is runtime but how to export them.
 
 We tried following appoaches:
