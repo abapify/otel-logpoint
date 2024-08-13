@@ -75,16 +75,28 @@ class lcl_entry_handler implementation.
 
     " parse entry
     data(rtm_parser) = zcl_rtm_parser=>parse( binary = entry-xtext ).
-    " this field is used in ZCL_OTEL_TRACE_PROCESSOR_RTM=>ZIF_OTEL_TRACE_PROCESSOR~ON_SPAN_END
-    data(payload) = conv xstring( rtm_parser->get( 'SPAN_DATA' )->value ).
+    data(span_data) = rtm_parser->get( 'SPAN_DATA' ).
 
-    data span type ref to zif_otel_span_serializable.
+    if span_data->truncated eq abap_false.
 
-    call transformation id
-      source xml payload
-      result span = span.
+      " this field is used in ZCL_OTEL_TRACE_PROCESSOR_RTM=>ZIF_OTEL_TRACE_PROCESSOR~ON_SPAN_END
+      data(payload) = conv xstring( span_data->value ).
 
-    span_publisher->add_span( span ).
+      data span type ref to zif_otel_span_serializable.
+
+      try.
+
+          call transformation id
+            source xml payload
+            result span = span.
+
+          span_publisher->add_span( span ).
+
+        catch cx_transformation_error into data(lo_error).
+
+      endtry.
+
+    endif.
 
   endmethod.
 
