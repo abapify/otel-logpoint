@@ -34,7 +34,7 @@ it enables serialising of spans and storing them as log records for a log-point 
 
 ## Importing checkpoint group logs
 
-Currently this solution is delivered as a program `ZABAP2OTEL_EXPORT_RTM_TRACES` which can be ran in your system let's say every 1 minute. Log entries are read by `zcl_rtm_iterator` class and fields are parsed by `zcl_rtm_parser`. Once we have a deserialised span we can export it using a an exporter class like `zcl_abap2otel_span_exporter`. Please notice that in this example we're exporting it not in a OTPL format but using own abap2otel format. We have a separate proxy written in NodeJS which is proxying such requests and transforming them to open telemetry using official SDK.
+Currently this solution is delivered as a program `ZABAP2OTEL_EXPORT_RTM_TRACES` which can be ran in your system let's say every 1 minute. Log entries are read by `zcl_rtm_iterator` class and fields are parsed by `zcl_rtm_parser`. Once we have a deserialised span we can export it using a an exporter class like `zcl_abap2otel_span_exporter`. Please notice that in this example we're exporting it not in a OTLP format but using own abap2otel format. We have a separate proxy written in NodeJS which is proxying such requests and transforming them to open telemetry using official SDK.
 
 This approach helps us it avoid supporint OTLP schema and implementing unnessary protobuf serialisation/deserialisation which is also not a part of standard code.
 
