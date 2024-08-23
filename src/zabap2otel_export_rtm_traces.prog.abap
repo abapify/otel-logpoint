@@ -25,12 +25,29 @@ select-options s_prog for ui-program.
 parameters x_local as checkbox.
 parameters x_del_db as checkbox default 'X'.
 
+parameters one_job as checkbox.
+
 class lcl_entry_handler definition.
   public section.
     interfaces zif_rtm_entry_handler.
 endclass.
 
+class batch_job definition abstract.
+  public section.
+    constants: running type tbtco-status value 'R'.
+    class-methods:
+      current_job returning value(result) type tbtco,
+      has_other_jobs_running returning value(result) type abap_bool.
+endclass.
+
+
 start-of-selection.
+
+  if one_job eq abap_true.
+    if batch_job=>has_other_jobs_running( ) eq abap_false.
+      message 'There is already another job running. Skipping this one' type 'S'.
+    endif.
+  endif.
 
   data(destination) = zcl_fetch_destination=>rfc( destination = p_dest ).
   " set default client
@@ -100,4 +117,47 @@ class lcl_entry_handler implementation.
 
   endmethod.
 
+endclass.
+
+class wp definition abstract.
+  public section.
+    class-methods class_constructor.
+    class-data:
+      no    type wpinfo-wp_no read-only,
+      pid   type wpinfo-wp_pid read-only,
+      index type wpinfo-wp_index read-only.
+endclass.
+
+class wp implementation.
+  method  class_constructor.
+    call function 'TH_GET_OWN_WP_NO'
+      importing
+        wp_no    = no
+        wp_pid   = pid
+        wp_index = index.
+  endmethod.
+endclass.
+
+
+class batch_job implementation.
+  method current_job.
+    check sy-batch eq abap_true.
+    select single * from tbtco into @result
+      where status     = @running
+      and   wpnumber   = @wp=>no
+      and   wpprocid   = @wp=>pid
+      and   btcsysreax = @sy-host.
+  endmethod.
+  method has_other_jobs_running.
+
+    data(current_job) = current_job( ).
+    check current_job is not initial.
+
+    select count(*) from tbtco into @data(lv_count)
+      where status  = @running
+      and   jobname = @current_job-jobname.
+
+    result = xsdbool( lv_count > 1 ).
+
+  endmethod.
 endclass.

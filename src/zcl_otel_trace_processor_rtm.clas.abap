@@ -7,36 +7,33 @@ class zcl_otel_trace_processor_rtm definition
   interfaces zif_otel_trace_processor.
   protected section.
   private section.
-endclass.
+ENDCLASS.
 
 
 
-class zcl_otel_trace_processor_rtm implementation.
-  METHOD zif_otel_trace_processor~on_span_start.
+CLASS ZCL_OTEL_TRACE_PROCESSOR_RTM IMPLEMENTATION.
 
-  ENDMETHOD.
 
-  METHOD zif_otel_trace_processor~on_span_event.
+  method zif_otel_trace_processor~on_span_end.
 
-  ENDMETHOD.
+    data(span_data) = cast zif_otel_serializable( span )->serialize( ).
 
-  METHOD zif_otel_trace_processor~on_span_end.
-
-    data(span_ref) = cast zcl_otel_span(  span ).
-    data(span_flat) = span_ref->get_serializable( ).
-
-    call transformation id
-      source span = span_flat
-      result xml data(span_data)
-      options initial_components = 'suppress'.
-
-    log-point id ZOTEL_TRACE_SPANS
+    log-point id zotel_trace_spans
       " subkey must be unique
       " span_id is not sufficient alone to be a an id
       subkey |{ span->trace_id }/{ span->span_id }|
       fields
       span_data.
 
+  endmethod.
+
+
+  METHOD zif_otel_trace_processor~on_span_event.
+
   ENDMETHOD.
 
-endclass.
+
+  METHOD zif_otel_trace_processor~on_span_start.
+
+  ENDMETHOD.
+ENDCLASS.
