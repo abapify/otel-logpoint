@@ -3,9 +3,9 @@
  <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
   <asx:values>
    <VSEOCLASS>
-    <CLSNAME>ZCL_OTEL_METRICS_PROCESSOR_RTM</CLSNAME>
+    <CLSNAME>ZCL_OTEL_RTM_HANDLER</CLSNAME>
     <LANGU>E</LANGU>
-    <DESCRIPT>RTM metrics processor</DESCRIPT>
+    <DESCRIPT>RTM handler</DESCRIPT>
     <STATE>1</STATE>
     <CLSCCINCL>X</CLSCCINCL>
     <FIXPT>X</FIXPT>

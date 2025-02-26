@@ -27,11 +27,6 @@ parameters x_del_db as checkbox default 'X'.
 
 parameters one_job as checkbox.
 
-class lcl_entry_handler definition.
-  public section.
-    interfaces zif_rtm_entry_handler.
-endclass.
-
 class batch_job definition abstract.
   public section.
     constants: running type tbtco-status value 'R'.
@@ -54,14 +49,13 @@ start-of-selection.
   " requirement for abap2otel proxy
   destination->defaults->header( 'client' )->set( |{ sy-sysid }/{ sy-mandt }| ).
 
-  data(http_exporter) = new zcl_otel_http_exporter( destination ).
 
-  data(entry_handler) = new lcl_entry_handler( ).
 
-  data(span_publisher) = new zcl_abap2otel_span_exporter(
-      message_bus = http_exporter
-      batch_size  = p_batch
+  data(exporter) = new zcl_otel_http_exporter(
+    destination = destination
   ).
+
+  data(entry_handler) = new zcl_otel_rtm_handler( exporter = exporter ).
 
   try.
 
@@ -80,44 +74,7 @@ start-of-selection.
       message lo_cx type 'I' display like 'E'.
   endtry.
 
-  " messages should be sent immediately once batch size is reached
-  " here we send arleady only rest of not published messages
-  span_publisher->export( ).
 
-class lcl_entry_handler implementation.
-  method zif_rtm_entry_handler~handle_entry.
-
-    " always processed as of now nomatter what happens below
-    processed = abap_true.
-
-    " parse entry
-    data(rtm_parser) = zcl_rtm_parser=>parse( binary = entry-xtext ).
-    data(span_data) = rtm_parser->get( 'SPAN_DATA' ).
-
-    if span_data->truncated eq abap_false.
-
-      " this field is used in ZCL_OTEL_TRACE_PROCESSOR_RTM=>ZIF_OTEL_TRACE_PROCESSOR~ON_SPAN_END
-      data(payload) = conv xstring( span_data->value ).
-
-      data span type ref to zif_otel_span_serializable.
-
-      try.
-
-          call transformation id
-            source xml payload
-            result span = span.
-
-          span_publisher->add_span( span ).
-
-        catch cx_transformation_error into data(lo_error).
-
-      endtry.
-
-    endif.
-
-  endmethod.
-
-endclass.
 
 class wp definition abstract.
   public section.
