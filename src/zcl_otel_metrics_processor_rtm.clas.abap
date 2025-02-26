@@ -21,6 +21,7 @@ class zcl_otel_metrics_processor_rtm definition
       end of attribute_ts,
       begin of data_point_ts,
         value      type f,
+        timestamp  type timestampl,
         attributes type table of attribute_ts with empty key,
       end of data_point_ts,
       begin of metric_ts,
@@ -68,7 +69,11 @@ CLASS ZCL_OTEL_METRICS_PROCESSOR_RTM IMPLEMENTATION.
             data_points = value #(
              (
                value = data_point->value
-               attributes = data_point->attributes
+               timestamp = data_point->timestamp
+               attributes = value #(
+               for entry in data_point->attributes( )->entries( )
+               where ( value is not initial )
+               ( entry ) )
               )
             )
         )
