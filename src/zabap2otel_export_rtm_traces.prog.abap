@@ -14,11 +14,11 @@ data:
     program type progname,
   end of ui.
 
-parameters p_dest type rfcdest obligatory default 'ABAP2OTEL_PROXY_HTTP'.
+parameters p_dest type rfcdest obligatory default 'ABAP2OTEL_HTTP'.
 " batch size
 parameters p_batch type i default 100.
 
-select-options s_test for ui-test no intervals no-extension obligatory default 'ZOTEL_TRACE_SPANS'.
+select-options s_test for ui-test no intervals no-extension obligatory default 'ZOTEL_MSG'.
 select-options s_subkey for ui-subkey.
 select-options s_prog for ui-program.
 
@@ -51,11 +51,11 @@ start-of-selection.
 
 
 
-  data(exporter) = new zcl_otel_http_exporter(
+  data(publisher) = new zcl_otel_publisher_http(
     destination = destination
   ).
 
-  data(entry_handler) = new zcl_otel_rtm_handler( exporter = exporter ).
+  data(entry_handler) = new zcl_otel_rtm_handler( publisher = publisher ).
 
   try.
 
