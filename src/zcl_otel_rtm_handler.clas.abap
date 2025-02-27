@@ -6,21 +6,27 @@ class zcl_otel_rtm_handler definition
   public section.
     interfaces zif_rtm_entry_handler.
     data count type i read-only.
+
+    types publisher_type type ref to ZIF_OTEL_PUBLISHER.
+
     methods constructor
-      importing exporter type ref to zif_otel_msg_bus.
+      importing publisher type publisher_type.
 
   protected section.
 
   private section.
-    data exporter type ref to zif_otel_msg_bus.
-endclass.
+    data publisher type publisher_type.
+ENDCLASS.
 
 
 
-class zcl_otel_rtm_handler implementation.
+CLASS ZCL_OTEL_RTM_HANDLER IMPLEMENTATION.
+
+
  method constructor.
-    me->exporter = exporter.
+    me->publisher = publisher.
   endmethod.
+
 
   method zif_rtm_entry_handler~handle_entry.
 
@@ -42,7 +48,7 @@ class zcl_otel_rtm_handler implementation.
             result msg = msg.
 
         if msg is bound.
-         me->exporter->publish( msg ).
+         me->publisher->publish( msg ).
         endif.
         processed = abap_true.
       catch cx_static_check.
@@ -51,4 +57,4 @@ class zcl_otel_rtm_handler implementation.
     endtry.
 
   endmethod.
-endclass.
+ENDCLASS.
