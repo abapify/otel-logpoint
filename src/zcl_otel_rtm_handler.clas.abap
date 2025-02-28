@@ -7,15 +7,15 @@ class zcl_otel_rtm_handler definition
     interfaces zif_rtm_entry_handler.
     data count type i read-only.
 
-    types publisher_type type ref to ZIF_OTEL_PUBLISHER.
+    types stream_type type ref to zif_otel_stream.
 
     methods constructor
-      importing publisher type publisher_type.
+      importing stream type stream_type.
 
   protected section.
 
   private section.
-    data publisher type publisher_type.
+    data stream type stream_type.
 ENDCLASS.
 
 
@@ -24,7 +24,7 @@ CLASS ZCL_OTEL_RTM_HANDLER IMPLEMENTATION.
 
 
  method constructor.
-    me->publisher = publisher.
+    me->stream = stream.
   endmethod.
 
 
@@ -47,8 +47,8 @@ CLASS ZCL_OTEL_RTM_HANDLER IMPLEMENTATION.
             source xml binary
             result msg = msg.
 
-        if msg is bound.
-         me->publisher->publish( msg ).
+        if msg is bound and stream is bound.
+         me->stream->publish( msg ).
         endif.
         processed = abap_true.
       catch cx_static_check.

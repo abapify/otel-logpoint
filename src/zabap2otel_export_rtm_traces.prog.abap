@@ -49,13 +49,18 @@ start-of-selection.
   " requirement for abap2otel proxy
   destination->defaults->header( 'client' )->set( |{ sy-sysid }/{ sy-mandt }| ).
 
-
-
-  data(publisher) = new zcl_otel_publisher_http(
-    destination = destination
+  " stream will send all inbound messages directly to http destination
+  data(stream) = new zcl_otel_publisher_http( destination ).
+  " buffer is used to keep records
+  data(buffer) = new zcl_abap2otel_msg( ).
+  " exporter - is a special layer which observes buffer and streams it further once is full
+  data(exporter) = new zcl_otel_buffer_exporter(
+      buffer     = buffer
+      stream     = stream
+      batch_size = p_batch
   ).
 
-  data(entry_handler) = new zcl_otel_rtm_handler( publisher = publisher ).
+  data(entry_handler) = new zcl_otel_rtm_handler( stream = buffer ).
 
   try.
 
@@ -74,7 +79,7 @@ start-of-selection.
       message lo_cx type 'I' display like 'E'.
   endtry.
 
-
+  exporter->export( ).
 
 class wp definition abstract.
   public section.
